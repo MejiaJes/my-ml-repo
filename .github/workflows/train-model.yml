@@ -1,4 +1,4 @@
-name: Train Model
+name: Train with DVC and MLflow
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Cache pip dependencies
         uses: actions/cache@v4
@@ -28,8 +28,18 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Train model
+      - name: Pull versioned dataset with DVC
+        run: dvc pull
+
+      - name: Train model and log to MLflow
         run: python src/train.py
+
+      - name: Upload MLflow run data as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlflow-run
+          path: mlruns/
+          retention-days: 7
 
       - name: Upload trained model as artifact
         uses: actions/upload-artifact@v4
